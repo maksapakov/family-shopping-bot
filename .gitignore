@@ -1,0 +1,18 @@
+# binaries
+/bin/
+*.exe
+bot
+
+#database
+*.sqlite
+*.db
+*.db-wal
+*.db-shm
+
+# secrets
+.env
+
+# IDE
+.vscode/
+.idea/
+.zed/
