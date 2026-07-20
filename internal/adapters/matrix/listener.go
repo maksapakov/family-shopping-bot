@@ -86,6 +86,7 @@ func (l *Listener) Run(ctx context.Context) error {
 						"sender", ev.Sender,
 						"body", ev.Content.Body,
 					)
+					// парсим строку ввода
 					names := app.ParseItemNames(ev.Content.Body)
 					err := l.addItem.ExecuteMany(
 						ctx,
