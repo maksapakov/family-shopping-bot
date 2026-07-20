@@ -103,3 +103,23 @@ internal/app/      — use cases (Toggle, Undo, AddItem)
 internal/adapters/ — sqlite, matrix, memory
 internal/port/     — интерфейсы
 ```
+
+## Разработка и релизы
+
+Основная ветка: `main` (через PR). Semver считает [Release Please](https://github.com/googleapis/release-please) по [Conventional Commits](https://www.conventionalcommits.org/).
+
+### Conventional Commits → semver
+
+| Префикс | Версия | Пример |
+|---------|--------|--------|
+| `fix:` | patch (0.1.0 → 0.1.1) | `fix: не redact'ить при пустом вводе` |
+| `feat:` | minor (0.1.0 → 0.2.0) | `feat: toggle по команде в Matrix` |
+| `feat!:` или `BREAKING CHANGE:` в теле | major (0.1.0 → 1.0.0) | `feat!: смена API callback` |
+| `docs:`, `chore:`, `refactor:`, `test:` | без bump | `docs: описать env` |
+
+### Workflow
+
+1. Ветка от `main` → коммиты как выше → PR
+2. CI (`go test ./...`) зелёный → merge в `main`
+3. Release Please откроет/обновит PR «Release v0.x.x»
+4. Merge Release PR → тег + GitHub Release + `CHANGELOG.md`
