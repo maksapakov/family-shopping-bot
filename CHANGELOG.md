@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.3.1](https://github.com/maksapakov/family-shopping-bot/compare/v0.3.0...v0.3.1) (2026-07-22)
+
+
+### Features
+
+* **list:** show checked items while they remain in undo window ([#8](https://github.com/maksapakov/family-shopping-bot/issues/8)) ([834ee84](https://github.com/maksapakov/family-shopping-bot/commit/834ee840f98f0879ce088ca5f11bef20c41ac1e1))
+
+
+### Bug Fixes
+
+* **release:** add release please token ([#11](https://github.com/maksapakov/family-shopping-bot/issues/11)) ([ec17dff](https://github.com/maksapakov/family-shopping-bot/commit/ec17dffdd5f83d4f8f752fd91ec192da430b70e2))
+* **release:** allow manual CI runs for release pull requests ([18e762e](https://github.com/maksapakov/family-shopping-bot/commit/18e762e7a3aa53e5aea68253199d6e7913cdf5c0))
+
 ## [0.3.0](https://github.com/maksapakov/family-shopping-bot/compare/v0.2.0...v0.3.0) (2026-07-22)
 
 
