@@ -190,25 +190,33 @@ func runDemo(
 	repo port.ListRepository,
 	signer *callback.Signer,
 ) error {
-	list := domain.NewShoppingList("demo-list", "demo-chat")
-	list.AddItem(domain.NewItem("item-1", "Milk", "mom", domain.LocationProducts))
-	if err := repo.Save(ctx, list); err != nil {
-		return fmt.Errorf("save list: %w", err)
-	}
-	slog.Info("before toggle", "checked", list.Items[0].IsChecked())
-	if err := toggle.Execute(ctx, "demo-chat", "item-1"); err != nil {
-		return fmt.Errorf("toggle item-1: %w", err)
-	}
 	got, err := repo.GetByChatID(ctx, "demo-chat")
+	if errors.Is(err, sqlite.ErrNotFound) {
+		list := domain.NewShoppingList("demo-list", "demo-chat")
+		list.AddItem(domain.NewItem("item-1", "Milk", "mom", domain.LocationProducts))
+		if err := repo.Save(ctx, list); err != nil {
+			return fmt.Errorf("save list: %w", err)
+		}
+		slog.Info("before toggle", "checked", list.Items[0].IsChecked())
+		if err := toggle.Execute(ctx, "demo-chat", "item-1"); err != nil {
+			return fmt.Errorf("toggle item-1: %w", err)
+		}
+		got, err = repo.GetByChatID(ctx, "demo-chat")
+		if err != nil {
+			return fmt.Errorf("get demo-chat: %w", err)
+		}
+		slog.Info("after toggle", "got", got.Items[0].IsChecked(), "message_ref", got.MessageRef)
+		slog.Info("demo urls",
+			"toggle", fmt.Sprintf("/toggle?chat=demo-chat&item=item-1&sig=%s",
+				signer.SignToggle("demo-chat", "item-1")),
+			"undo", fmt.Sprintf("/undo?chat=demo-chat&sig=%s",
+				signer.SignUndo("demo-chat")),
+		)
+		return nil
+	}
 	if err != nil {
 		return fmt.Errorf("get demo-chat: %w", err)
 	}
-	slog.Info("after toggle", "got", got.Items[0].IsChecked(), "message_ref", got.MessageRef)
-	slog.Info("demo urls",
-		"toggle", fmt.Sprintf("/toggle?chat=demo-chat&item=item-1&sig=%s",
-			signer.SignToggle("demo-chat", "item-1")),
-		"undo", fmt.Sprintf("/undo?chat=demo-chat&sig=%s",
-			signer.SignUndo("demo-chat")),
-	)
+	slog.Info("demo list already exists", "elements", len(got.Items))
 	return nil
 }
