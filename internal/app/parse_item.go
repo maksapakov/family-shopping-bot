@@ -3,12 +3,16 @@ package app
 import "strings"
 
 func ParseItemNames(text string) []string {
-	r := strings.NewReplacer(
-		",", " ",
-		";", " ",
-		".", " ",
-		"\n", " ",
-	)
-	rr := r.Replace(text)
-	return strings.Fields(rr)
+	r := strings.FieldsFunc(text, func(r rune) bool {
+		return r == ',' || r == ';' || r == '\n'
+	})
+
+	var out []string
+	for _, s := range r {
+		s = strings.TrimSpace(s)
+		if s != "" {
+			out = append(out, s)
+		}
+	}
+	return out
 }
