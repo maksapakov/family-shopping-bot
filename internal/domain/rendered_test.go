@@ -21,11 +21,12 @@ func TestShoppingList_Render_filters_by_tab(t *testing.T) {
 
 func TestShoppingList_Render(t *testing.T) {
 	tests := []struct {
-		name     string
-		setup    func(l *ShoppingList)
-		query    []string
-		wantLen  int
-		wantName []string
+		name        string
+		setup       func(l *ShoppingList)
+		query       []string
+		wantLen     int
+		wantName    []string
+		wantChecked bool
 	}{
 		{
 			name:     "two_items_added",
@@ -39,9 +40,10 @@ func TestShoppingList_Render(t *testing.T) {
 			setup: func(l *ShoppingList) {
 				l.Items[0].Toggle()
 			},
-			query:    []string{"item-1", "item-2"},
-			wantLen:  1,
-			wantName: []string{"item-2"},
+			query:       []string{"item-1", "item-2"},
+			wantLen:     2,
+			wantName:    []string{"item-1", "item-2"},
+			wantChecked: true,
 		},
 	}
 	for _, tt := range tests {
@@ -65,6 +67,9 @@ func TestShoppingList_Render(t *testing.T) {
 				if got.Items[i].Name != item {
 					t.Fatalf("rendered items name is %s, want %s", got.Items[i].Name, item)
 				}
+			}
+			if tt.wantChecked != got.Items[0].IsChecked {
+				t.Fatalf("rendered items count is %v, want true", got.Items[0].IsChecked)
 			}
 		})
 	}
