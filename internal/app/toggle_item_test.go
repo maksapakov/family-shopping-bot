@@ -40,11 +40,8 @@ func TestToggleItem_Execute(t *testing.T) {
 	if messenger.CallCount != 1 {
 		t.Fatalf("CallCount = %d, want %d", messenger.CallCount, 1)
 	}
-	if len(messenger.LastRendered.Items) != 1 {
-		t.Fatalf("LastRendered.Items = %d, want %d", len(messenger.LastRendered.Items), 1)
-	}
-	if !messenger.LastRendered.Items[0].IsChecked {
-		t.Fatalf("LastRendered.Items[0].IsChecked = %v, want %v", messenger.LastRendered.Items[0].IsChecked, true)
+	if len(messenger.LastRendered.Items) != 0 {
+		t.Fatalf("LastRendered.Items = %d, want %d", len(messenger.LastRendered.Items), 0)
 	}
 }
 

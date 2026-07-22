@@ -211,7 +211,18 @@ func (r *ListRepo) Save(ctx context.Context, list *domain.ShoppingList) error {
 		return fmt.Errorf("deleting items: %w", err)
 	}
 
+	snaps := list.UndoSnapshot()
+	keep := make(map[domain.ItemID]struct{}, len(snaps))
+	for _, s := range snaps {
+		keep[s.ItemID] = struct{}{}
+	}
 	for _, item := range list.Items {
+		if item.IsChecked() {
+			if _, ok := keep[item.ID]; !ok {
+				continue
+			}
+		}
+
 		checked := 0
 		if item.IsChecked() {
 			checked = 1
@@ -246,7 +257,7 @@ func (r *ListRepo) Save(ctx context.Context, list *domain.ShoppingList) error {
 		return fmt.Errorf("deleting undo_actions: %w", err)
 	}
 
-	for pos, snap := range list.UndoSnapshot() {
+	for pos, snap := range snaps {
 		var checkedAt any
 		if snap.WasChecked && !snap.CheckedAt.IsZero() {
 			checkedAt = snap.CheckedAt.UTC().Format(time.RFC3339)

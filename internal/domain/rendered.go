@@ -17,12 +17,14 @@ func (l *ShoppingList) Render() RenderedList {
 	items := l.ItemsByTab()
 	var renderedItems []RenderedItem
 	for _, item := range items {
-		renderedItems = append(renderedItems, RenderedItem{
-			ID:        item.ID,
-			Name:      item.Name,
-			IsChecked: item.IsChecked(),
-			ClickURL:  "",
-		})
+		if !item.IsChecked() {
+			renderedItems = append(renderedItems, RenderedItem{
+				ID:        item.ID,
+				Name:      item.Name,
+				IsChecked: item.IsChecked(),
+				ClickURL:  "",
+			})
+		}
 	}
 	return RenderedList{
 		ActiveTab: l.ActiveTab,
