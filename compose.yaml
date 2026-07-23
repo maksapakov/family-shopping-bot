@@ -1,0 +1,15 @@
+services:
+  bot:
+    build: .
+    ports:
+      - "8181:8181"
+    env_file:
+      - .env
+    environment:
+      DATABASE_PATH: /data/shopping.db
+    volumes:
+      - bot-data:/data
+    restart: unless-stopped
+
+volumes:
+  bot-data:
