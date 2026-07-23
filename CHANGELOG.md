@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.4.0](https://github.com/maksapakov/family-shopping-bot/compare/v0.3.1...v0.4.0) (2026-07-23)
+
+
+### Features
+
+* **docker:** add image build and publish to GHCR ([#12](https://github.com/maksapakov/family-shopping-bot/issues/12)) ([8b6e471](https://github.com/maksapakov/family-shopping-bot/commit/8b6e471bc2461114d79f7946f866eb63addc8e44))
+
 ## [0.3.1](https://github.com/maksapakov/family-shopping-bot/compare/v0.3.0...v0.3.1) (2026-07-22)
 
 
