@@ -55,7 +55,7 @@ go run ./cmd/bot/
 
 Комната должна быть **без E2EE** (или бот не прочитает текст). Боту нужны права **Moderator** (или redact чужих сообщений), иначе ввод семьи не удалится из чата.
 
-Добавление в чат: пиши названия продуктов (`Картошка`, `Морковь Соль` — несколько слов = несколько item). Сообщение после обработки redact'ится.
+Добавление в чат: пиши названия продуктов (`Картошка, Морковь; Соль` — несколько item через `,` `;` или перевод строки; пробел внутри имени сохраняется). Сообщение после обработки redact'ится.
 
 ## Переменные окружения
 
@@ -64,13 +64,13 @@ go run ./cmd/bot/
 | `CALLBACK_SECRET` | да | — | Пусто → бот не стартует |
 | `CALLBACK_BASE_URL` | для ссылок в списке | пусто | База URL callback |
 | `DATABASE_PATH` | нет | `shopping.db` | Путь к SQLite |
-| `DEMO` | нет | выкл | `DEMO=1` — seed `demo-chat` + toggle Milk при старте |
+| `DEMO` | нет | выкл | `DEMO=1` — seed `demo-chat` (Milk), только если списка ещё нет |
 | `MATRIX_*` | для Matrix | — | См. таблицу выше |
 | `SHOPPING_CHAT_ID` | для Matrix listener | пусто | `chat_id` в БД для входящих сообщений |
 
 ### Важно про `DEMO=1`
 
-При каждом старте `runDemo` **перезаписывает** список `demo-chat` (один item Milk). Накопленные в Matrix товары для этого `chat_id` пропадут. Для обыной работы **не ставь** `DEMO=1`, либо используй другой `SHOPPING_CHAT_ID`, либо доработай demo «seed только если списка нет».
+При старте `runDemo` создаёт `demo-chat` **только если списка ещё нет** (seed Milk + один toggle). Если список уже есть — не трогает. На проде **не ставь** `DEMO=1`, либо используй другой `SHOPPING_CHAT_ID`.
 
 ## HTTP API
 
@@ -123,3 +123,80 @@ internal/port/     — интерфейсы
 2. CI (`go test ./...`) зелёный → merge в `main`
 3. Release Please откроет/обновит PR «Release v0.x.x»
 4. Merge Release PR → тег + GitHub Release + `CHANGELOG.md`
+
+## Docker
+
+Образ: [`ghcr.io/maksapakov/family-shopping-bot`](https://github.com/maksapakov/family-shopping-bot/pkgs/container/family-shopping-bot)
+
+Теги: `latest`, semver (`0.4.0`, `0.4`, …) — публикуются workflow при теге `v*` или вручную (`workflow_dispatch` → тег `manual`).
+
+### Переменные окружения
+
+```bash
+cp env.example .env
+```
+
+Заполни значения в `.env`. Файл `.env` в git не коммитится.
+
+| Переменная | Обязательна | Описание |
+|------------|-------------|----------|
+| `CALLBACK_SECRET` | да | Секрет подписи `/toggle` и `/undo` |
+| `CALLBACK_BASE_URL` | да для ссылок в списке | Публичный базовый URL бота, напр. `https://bot.example.com` |
+| `DATABASE_PATH` | нет | Путь к SQLite. В compose по умолчанию `/data/shopping.db` |
+| `SHOPPING_CHAT_ID` | для Matrix | Ключ списка в БД |
+| `MATRIX_HOMESERVER` | для Matrix | Homeserver без `/_matrix/...` |
+| `MATRIX_ACCESS_TOKEN` | для Matrix | Access token бота |
+| `MATRIX_ROOM_ID` | для Matrix | Internal room ID |
+| `DEMO` | нет | `1` — seed `demo-chat`, только если списка ещё нет. На проде не включать |
+
+### Compose (сервер, образ из GHCR)
+
+Создай `compose.yaml` рядом с `.env`:
+
+```yaml
+services:
+  bot:
+    image: ghcr.io/maksapakov/family-shopping-bot:latest
+    # или semver :0.4.0
+    ports:
+      - "8181:8181"
+    env_file:
+      - .env
+    environment:
+      DATABASE_PATH: /data/shopping.db
+    volumes:
+      - bot-data:/data
+    restart: unless-stopped
+
+volumes:
+  bot-data:
+```
+
+Запуск:
+
+```bash
+docker compose pull
+docker compose up -d
+curl https://example.server.com/health
+```
+
+SQLite хранится в volume `bot-data` → `/data/shopping.db`.
+
+Если package private:
+
+```bash
+echo "$GITHUB_TOKEN" | docker login ghcr.io -u USERNAME --password-stdin
+```
+
+Нужен token с `read:packages` (или `gh auth token` после `gh auth login`).
+
+### Локальная сборка из репозитория
+
+В репозитории есть `compose.yaml` с `build: .`.
+
+```bash
+cp env.example .env
+# заполни секреты
+docker compose up --build -d
+curl https://example.server.com/health
+```
